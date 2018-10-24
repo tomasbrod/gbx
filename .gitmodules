@@ -1,0 +1,3 @@
+[submodule "btrpc"]
+	path = btrpc
+	url = https://github.com/aceat64/EasyBitcoin-PHP.git
