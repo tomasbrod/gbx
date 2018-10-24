@@ -22,11 +22,13 @@ class PageRender
 		?>
 			<html><head>
 				<title>Gridcoin Network</title>
+				<link rel='stylesheet' href='<?=hrefs('1.css')?>'/>
 			</head><body>
 				<h1>Gridcoin Test Network</h1>
 				<p><strike>--header--</strike></p>
 				<?=$body?>
 				<p><strike>--footer--</strike></p>
+				<script type='text/javascript' src='<?=hrefs('1.js')?>'></script>
 			</body>
 		<?php
 	}
@@ -114,7 +116,32 @@ function pageWhat($page,$rpc,$arg)
 
 function href($rel)
 {
-	echo $_SERVER['SCRIPT_NAME'].'/'.$rel;
+	return $_SERVER['SCRIPT_NAME'].'/'.$rel;
+}
+
+function hrefs($rel)
+{
+	/* The t parameter is there to trigger reload of the resource if it changes */
+	$time= filemtime ( "static/$rel" );
+	return $_SERVER['SCRIPT_NAME'].'/static/'.$rel.'?t=' . $time;
+}
+
+function pageStatic($name)
+{
+	/* You should realy configure your server to serve static files. */
+	$allowed=Array(
+		'1.css'=>'text/css',
+		'1.js'=>'text/javascript',
+	);
+	if(isset($allowed[$name]))
+	{
+		header("Content-type: ".$allowed[$name]);
+		header("Expires: ". gmstrftime("%a, %d %b %Y %H:%M:%S GMT", time() + 365*86440) );
+		readfile("static/$name");
+	} else {
+		header("HTTP/1.1 404 Not Found");
+		echo "resource not found";
+	}
 }
 
 function main()
@@ -123,6 +150,11 @@ function main()
 	$page=new PageRender();
 	try {
 		$path=splitPath1($_SERVER['PATH_INFO']);
+		if($path[0] == "/static")
+		{
+			$page->abort();
+			return pageStatic($path[1]);
+		}
 		$api= new Bitcoin("gridcoinrpc","CmSFqmq5gXDJhHv68JxbC7BPSMqpdHzah8mXQUxvs8FQ","127.0.0.1",25715);
 		$pageHandler=@$pages[$path[0]];
 		if(is_callable($pageHandler))	{
