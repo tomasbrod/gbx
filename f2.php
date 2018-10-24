@@ -9,6 +9,7 @@ function fragTransactionDetail($blockver,$index,$tx)
 
 function fragTransactionInOut($tx)
 {
+	/*FormatTreeNodeHtml($tx);*/
 	?>
 	<div><div>Inputs</div><?php foreach($tx->vin as $in): $in=(object)$in; ?>
 		<a href='<?=href("tx/{$in->txid}?i={$in->vout}")?>'><?=substr($in->txid,0,6)?>-<?=$in->vout?></a>
@@ -32,6 +33,14 @@ function fragTransactionInOut($tx)
 function fragBlock($block)
 {
 	$usertxstart=2;
+	$coinbase=(object)$block->tx[0];
+	$coinstake=(object)$block->tx[1];
+	/* sections:
+	 * block data
+	 * block index
+	 * coinbase/stake
+	 * transactions
+	*/
 	?>
 	<main>
 		<h2>Block Details</h2>
@@ -66,25 +75,41 @@ function fragBlock($block)
 			<tr><th>IsContract<td><?=$block->IsContract?>
 			</tbody>
 		</table>
-		<div>
-			<p>coinbase, coinstake <s>...</s>
-		</div>
 		<?php for($ix=$usertxstart; $ix<count($block->tx); $ix++): $tx=(object)$block->tx[$ix]; ?><div>
 			<div>Transaction: <kbd><?=$tx->txid?></kbd></div>
 			<div>Delay: <?=fragTimePeriod($block->time - $tx->time)?>, (v<?=$tx->version?>)</div>
 			<?php if($tx->locktime): ?><div>
 				Locked <?=$tx->locktime?>
 			</div><?php endif; if(strlen($tx->hashboinc)):?><div>
-				Has message: <?=$tx->hashboinc?>
+				Has message: <kbd><?=htmlspecialchars($tx->hashboinc)?></kbd>
 			</div><?php endif;?>				
 			<?php fragTransactionInOut($tx); ?>
 			<br/>
 		</div><?php endfor;?>
+
+		<h3>Block Information</h3>
+		<p>Two-line tiles with inline-block display. First line title, second line value.
+		<p>hash, prev, next in header
+		<p>confirms count via javascript xhr ??
+		<p>height, diff, size, time, version, trust, modifier, flags
+		<h3>Coinbase</h3>
+			<?php FormatTreeNodeHtml($coinbase); FormatTreeNodeHtml($coinstake); ?>
+			<p>dissect hashboinc of coinbase (same two row inline-block tiles)
+			<p>optional coinstake hashboinc
+			<p>input list (combined)
+			<p>output list (combined)
+			<p>let's just put everything into inline-block!
+		<h3>Transactions</h3>
+			<p>hash, version, delay, locktime
+			<p>input list
+			<p>output list
+			<p>hashboinc dissect (for op_return, repeat for all transactions)
+		<h3>Index extra</h3>
+		<a href="https://grctnexplorer.neuralminer.io/block/002d8055684709e730ac82e2457558f81c787a74d16f866dfc9df3d8421b9310">Inspiration</a>
+		<p>mint, supply, 
+		<h3>
 	</main>
 	<?php
-	/*
-			<tr><th><td><?=$block->?>
-	*/
 }
 
 function pageBlock($page,$rpc,$arg)
