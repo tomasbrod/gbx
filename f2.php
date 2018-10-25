@@ -7,26 +7,59 @@ function fragTransactionDetail($blockver,$index,$tx)
 	echo "stub";
 }
 
-function fragTransactionInOut($tx)
+function toKiSize($val)
 {
-	/*FormatTreeNodeHtml($tx);*/
+	return $val;
+}
+
+function fragCoinbaseHashboinc($version,$hashboinc)
+{
 	?>
-	<div><div>Inputs</div><?php foreach($tx->vin as $in): $in=(object)$in; ?>
-		<a href='<?=href("tx/{$in->txid}?i={$in->vout}")?>'><?=substr($in->txid,0,6)?>-<?=$in->vout?></a>
-	<?php endforeach; ?></div>
-	<table>
-		<caption>Outputs</caption>
-		<thead>
-		<tr><th>Value<th>Type<th>Address</tr>
-	</thead><tbody>
-		<?php foreach($tx->vout as $out): $out=(object)$out; $out->type=$out->scriptPubKey['type']; $out->addresses=$out->scriptPubKey['addresses'];?>
-			<?php /*FormatTreeNodeHtml($out);*/ ?>
-			<tr><td><?=number_format($out->value,8,".","'")?>
-			<td><?=$out->type?>
-			<td><?php if(!empty($out->addresses)) { echo $out->addresses[0]; } else { echo "?";} ?>
-			</tr>
-		<?php endforeach; ?>
-	</tbody></table>		
+			<p>dissect hashboinc of coinbase ...
+	<?php
+}
+
+function fragTxHashBoinc($version,$hashboinc)
+{
+	?>
+			<p>dissect hashboinc of transactions ...
+	<?php
+}
+
+function fragInputsOutputs($inputs,$outputs)
+{
+	$outputs=array_filter($outputs, function($v) {
+		return !empty($v['value']);
+	});
+	?>
+	<div class='txio'>
+		<div class='txin'>
+			<span>Inputs</span>
+			<?php foreach($inputs as $in): ?>
+				<?php if(isset($in['txid'])): ?>
+					<div><a href='<?=href("tx/{$in['txid']}?i={$in['vout']}")?>'><?=substr($in['txid'],0,6)?>-<?=$in['vout']?></a></div>
+				<?php elseif(isset($in['coinbase'])): ?>
+					<div>coinbase</div>
+				<?php endif;?>
+			<?php endforeach;?>
+		</div>
+		<?php if(!empty($outputs)):?><div class='txouttitle'>Outputs</div><div class='txout'>
+			<?php foreach($outputs as $out): ?>
+				<div><span><?=number_format($out['value'],8,".","'")?></span> <span>GRC</span>
+				<?php if(isset($out['scriptPubKey']) && isset($out['scriptPubKey']['type'])):
+					if($out['scriptPubKey']['type']=="pubkey"):	?>
+						<span>PK</span>
+						<span><?=$out['scriptPubKey']['addresses'][0]?></span>
+					<?php elseif($out['scriptPubKey']['type']=="pubkeyhash"):	?>
+						<span>PKH</span>
+						<span><?=$out['scriptPubKey']['addresses'][0]?></span>
+					<?php else: ?>
+						<span>??</span>
+				<?php endif; endif; ?>
+				</div>
+			<?php endforeach; ?>
+		</div><?php endif; ?>
+	</div>
 	<?php
 }
 
@@ -44,6 +77,58 @@ function fragBlock($block)
 	?>
 	<main>
 		<h2>Block Details</h2>
+		
+
+		<h3>Block Information</h3>
+		<div class='blockinfoheader'>
+			<a href='<?=href('block/'.$block->previousblockhash)?>'><span class='arrowback'>&lt;=</span></a>
+			<span class='hash'><?=$block->hash?></span>
+			<?php if(isset($block->nextblockhash)): ?>
+				<a href='<?=href('block/'.$block->nextblockhash)?>'><span class='arrowfwrd'>=&gt;</span></a>
+			<?php endif;?>
+		</div>
+		<div class='blockinfo'>
+			<div><p>Height<p><?=$block->height?></div>
+			<div><p>Difficulty<p><?=number_format($block->difficulty,4,'.','')?></div>
+			<div><p>Depth<p>...</div>
+			<div><p>Size<p><?=toKiSize($block->size)?></div>
+			<div><p>Time<p><?=$block->time?></div>
+			<div><p>Ver<p><?=$block->version?></div>
+			<div><p>Flags<p>...</div>
+		</div>
+		<h3>Coinbase</h3>
+			<?php if(!empty($coinbase->hashboinc)) { fragCoinbaseHashboinc($block->version,$coinbase->hashboinc); } ?>
+			<?php if(!empty($coinstake->hashboinc)):?>
+				<div><p>CoinStake HashBoinc<p><?=htmlspecialchars($coinstake->hashboinc)?></div>
+			<?php endif;
+				$inputs=array_merge(array_values($coinbase->vin),array_values($coinstake->vin));
+				$outputs=array_merge(array_values($coinbase->vout),array_values($coinstake->vout));
+				fragInputsOutputs($inputs,$outputs);
+			?>
+		<h3>Transactions</h3>
+			<?php for($ix=$usertxstart; $ix<count($block->tx); $ix++): $tx=(object)$block->tx[$ix]; ?>
+			<div class='blocktx'>
+				<div class='hdr'>
+					<div><span>Transaction: </span><span><kbd><?=$tx->txid?></kbd></span><a href='<?=href('tx/'.$tx->txid)?>'>^</a></div>
+					<div>v<?=$tx->version?></div>
+					<div><span>Delay: </span><span><?=fragTimePeriod($block->time - $tx->time)?></span></div>
+					<?php if(!empty($tx->locktime)): ?>
+						<div><span>Locked: </span><span><?=$tx->locktime?></span></div>
+					<?php endif; ?>
+				</div>
+				<?php if(!empty($tx->hashboinc)) { fragTxHashBoinc($block->version,$tx->hashboinc); } ?>
+				<?php fragInputsOutputs($tx->vin,$tx->vout); ?>
+			</div><?php endfor;?>
+		<h3>Index extra</h3>
+		<a href="https://grctnexplorer.neuralminer.io/block/002d8055684709e730ac82e2457558f81c787a74d16f866dfc9df3d8421b9310">Inspiration</a>
+		<div class='blockinfox'>
+			<div><p>Money Supply<p><?=$block->MoneySupply?></div>
+			<div><p>Mint<p><?=$block->mint?></div>
+			<div><p>Trust<p><?=$block->blocktrust?></div>
+			<?php if(isset($block->modifier)):?>
+				<div><p>Modifier<p><?=$block->modifier?></div>
+			<?php endif;?>
+		</div>
 		<table><tbody>
 			<tr><th>Hash<td><?=$block->hash?>
 			<tr><th>Height<td><?=$block->height?>
@@ -75,39 +160,6 @@ function fragBlock($block)
 			<tr><th>IsContract<td><?=$block->IsContract?>
 			</tbody>
 		</table>
-		<?php for($ix=$usertxstart; $ix<count($block->tx); $ix++): $tx=(object)$block->tx[$ix]; ?><div>
-			<div>Transaction: <kbd><?=$tx->txid?></kbd></div>
-			<div>Delay: <?=fragTimePeriod($block->time - $tx->time)?>, (v<?=$tx->version?>)</div>
-			<?php if($tx->locktime): ?><div>
-				Locked <?=$tx->locktime?>
-			</div><?php endif; if(strlen($tx->hashboinc)):?><div>
-				Has message: <kbd><?=htmlspecialchars($tx->hashboinc)?></kbd>
-			</div><?php endif;?>				
-			<?php fragTransactionInOut($tx); ?>
-			<br/>
-		</div><?php endfor;?>
-
-		<h3>Block Information</h3>
-		<p>Two-line tiles with inline-block display. First line title, second line value.
-		<p>hash, prev, next in header
-		<p>confirms count via javascript xhr ??
-		<p>height, diff, size, time, version, trust, modifier, flags
-		<h3>Coinbase</h3>
-			<?php FormatTreeNodeHtml($coinbase); FormatTreeNodeHtml($coinstake); ?>
-			<p>dissect hashboinc of coinbase (same two row inline-block tiles)
-			<p>optional coinstake hashboinc
-			<p>input list (combined)
-			<p>output list (combined)
-			<p>let's just put everything into inline-block!
-		<h3>Transactions</h3>
-			<p>hash, version, delay, locktime
-			<p>input list
-			<p>output list
-			<p>hashboinc dissect (for op_return, repeat for all transactions)
-		<h3>Index extra</h3>
-		<a href="https://grctnexplorer.neuralminer.io/block/002d8055684709e730ac82e2457558f81c787a74d16f866dfc9df3d8421b9310">Inspiration</a>
-		<p>mint, supply, 
-		<h3>
 	</main>
 	<?php
 }
@@ -117,6 +169,13 @@ function pageBlock($page,$rpc,$arg)
 	$resp=$rpc->getblock($arg,true);
 	fragBlock((object)$resp);
 	$page->durStatic();
+}
+
+function pageTransaction($page,$rpc,$arg)
+{
+	$resp=$rpc->gettransaction($arg);
+	FormatTreeNodeHtml($resp);
+	$page->ok();
 }
 
 function kek($api)
@@ -214,4 +273,5 @@ $pages=Array(
 		"/what"=>"pageWhat",
 		"/block"=>"pageBlock",
 		"/recent"=>"pageRecent",
+		"/tx"=>"pageTransaction",
 );

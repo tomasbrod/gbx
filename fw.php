@@ -17,7 +17,7 @@ class PageRender
 	public function ok()
 	{
 		$body= ob_get_clean();
-		$this->filished= true;
+		$this->finished= true;
 		echo "<!DOCTYPE html>\n";
 		?>
 			<html><head>

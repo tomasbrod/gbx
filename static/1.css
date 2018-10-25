@@ -1,1 +1,23 @@
 /* CSS */
+div.blockinfo > div, div.blockinfox > div {
+	display: inline-block;
+	border: solid 2px orange;
+}
+
+div.blockinfoheader {
+	border: solid 2px orange;
+}
+
+div.blocktx > div.hdr > div {
+	display: inline-block;
+	border: solid 2px orange;
+}
+
+div.txio > div.txin > div {
+	display: inline-block;
+	border: solid 2px orange;
+}
+
+div.txio > div.txout > div {
+	display: block;
+}
