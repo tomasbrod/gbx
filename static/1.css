@@ -1,8 +1,4 @@
 /* CSS */
-div.blockinfo > div, div.blockinfox > div {
-	display: inline-block;
-	border: solid 2px orange;
-}
 
 div.blockinfoheader {
 	border: solid 2px orange;
@@ -20,4 +16,52 @@ div.txio > div.txin > div {
 
 div.txio > div.txout > div {
 	display: block;
+}
+
+div.txio > table.txout tr > td:nth-child(1) {
+	text-align: right;
+	padding-right: 1ex;
+}
+
+div.titlekvboxes {
+	border: solid 2px lightgreen;
+}
+
+div.titlekvboxes > div.title {
+	/* something for title ??? */
+	display: block;
+	border: none;
+}
+
+div.kvboxes > div, div.kvbox {
+	display: inline-block;
+	border: solid 2px orange;
+	max-width: 100%;
+	/*word-wrap: break-word;*/
+	overflow-wrap: break-word;
+}
+
+div.kvboxes > div > p:nth-child(1), div.kvbox > p:nth-child(1) {
+    font-weight: bold;
+    margin-top: inherit;
+    margin-bottom: 0.4ex;
+}
+div.kvboxes > div > p, div.kvbox > p {
+    font-weight: normal;
+    margin-top: inherit;
+    margin-bottom: inherit;
+}
+
+table.txout th {
+	font-weight: normal;
+	text-align: left;
+}
+
+table.txout tr > td:nth-child(2) {
+	border: orange 1px solid;
+}
+
+div.blocktx {
+	border: solid 2px yellow;
+	margin-top: 1em;
 }
