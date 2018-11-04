@@ -89,3 +89,24 @@ function pageRecent($page,$rpc,$arg)
 		</main>
 	<?php
 }
+
+function pageGetBlockByHeight($page,$rpc,$arg)
+{
+	/* get from cache
+	 * get block by height
+	 * get current block count from cache
+	 * if older than 1000 -> cache max, else cache 2 minutes
+	 * abort and redirect
+	*/
+}
+
+/* plots:
+ * ? difficulty
+ * daily cnt_transactions, avg_size
+ * researcher fraction, rewards daily
+ * contracts fraction daily
+ * avenz_magnitude
+*/
+function pagePlots()
+{
+}
