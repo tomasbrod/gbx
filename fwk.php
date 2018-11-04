@@ -71,8 +71,46 @@ function fragRelaTime($unix)
 
 function fragTimePeriod($time)
 {
-	//stub
 	return number_format($time,0,".","'") . "s";
+	//stub
+}
+function toKiSize($val)
+{
+	return number_format($val,0,'.',"'");
+	/* Note: it does not look good with the size prefixes */
+	$tab=Array(
+		1073741824=>'Gi',
+		1048576=>'Mi',
+		1024=>'Ki',
+	);
+	foreach($tab as $base=>$prefix)
+	{
+		if($val>($base*8))
+		{
+			$a = floor($val / $base);
+			return $a.$prefix.'B';
+		}
+	}
+	return $val.'B';
+}
+
+function GRCExtractXML($data,$key,$begin=FALSE)
+{
+	$tagL="<$key>";
+	$tagR="</$key>";
+	if($begin)
+	{
+		$posL=0;
+		if(substr($data,$posL,strlen($tagL))!=$tagL)
+			return FALSE;
+	} else {
+		$posL=strpos($data,$tagL);
+	}
+	$posR=strrpos($data,$tagR);
+	if($posL===FALSE || $posR===FALSE)
+		return FALSE;
+	$posL+=strlen($tagL);
+	return substr($data,$posL,$posR-$posL);
 }
 
 function myExceptionHandler($page,$e)

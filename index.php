@@ -5,5 +5,5 @@ if($_SERVER['PATH_INFO']=="/phpinfo") {
 
 /* no amount of shutdown handlers seem to catch parse errors ... */
 
-require("f2.php");
+require("all.php");
 main();
