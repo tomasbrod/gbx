@@ -109,6 +109,10 @@ function fragBlock($block)
 			<?php endif;?>
 			<div><p>Flags<p><?=$block->flags?></div>
 			<div><p>Proof Hash<p><?=$block->proofhash?></div>
+			<div><p>Coinbase<p><a href='<?=href('tx/'.$coinbase->txid)?>'><?=substr($coinbase->txid,0,6)?></a></div>
+			<?php if(isset($coinstake)): ?>
+				<div><p>Coinstake<p><a href='<?=href('tx/'.$coinstake->txid)?>'><?=substr($coinstake->txid,0,6)?></a></div>
+			<?php endif; ?>
 		</div>
 	</main>
 	<?php
